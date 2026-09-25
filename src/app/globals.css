@@ -1,0 +1,345 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-noto-sans);
+  --font-serif: var(--font-noto-serif);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+  --radius: 0.5rem;
+  --background: #1a1216;
+  --foreground: #f5ece4;
+  --card: #241a20;
+  --card-foreground: #f5ece4;
+  --popover: #241a20;
+  --popover-foreground: #f5ece4;
+  --primary: #d97a92;
+  --primary-foreground: #1a1216;
+  --secondary: #372a31;
+  --secondary-foreground: #f5ece4;
+  --muted: #372a31;
+  --muted-foreground: #b9a5ad;
+  --accent: #473039;
+  --accent-foreground: #ffd9e2;
+  --destructive: #e05c74;
+  --border: rgba(245, 236, 228, 0.14);
+  --input: rgba(245, 236, 228, 0.18);
+  --ring: #d97a92;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html,
+  body {
+    height: 100%;
+    overscroll-behavior: none;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: var(--font-noto-sans), "Noto Sans SC", sans-serif;
+  }
+  ::selection {
+    background: #d97a92;
+    color: #fff;
+  }
+}
+
+/* ── 字体 ─────────────────────────────── */
+.font-mincho,
+.font-serif-sc {
+  font-family: var(--font-noto-serif), "Noto Serif SC", serif;
+}
+
+/* ── 游戏容器 ─────────────────────────── */
+.game-stage {
+  position: relative;
+  width: 100%;
+  height: 100dvh;
+  overflow: hidden;
+  background: #0d090c;
+}
+
+/* ── 背景层 ───────────────────────────── */
+.bg-layer {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  transition:
+    opacity 0.9s ease,
+    filter 0.9s ease,
+    transform 12s linear;
+  will-change: opacity, transform;
+}
+.bg-layer.bg-kosho {
+  animation: bg-zoom 24s ease-in-out infinite alternate;
+}
+@keyframes bg-zoom {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.06);
+  }
+}
+.fx-dim {
+  filter: brightness(0.55) saturate(0.85);
+}
+.fx-flash {
+  animation: flash-white 0.65s ease-out;
+}
+@keyframes flash-white {
+  0% {
+    filter: brightness(2.6);
+  }
+  100% {
+    filter: brightness(1);
+  }
+}
+
+/* ── 演出图（立绘） ────────────────────── */
+.figure-layer {
+  position: absolute;
+  bottom: 0;
+  height: min(78vh, 118vw);
+  aspect-ratio: 4/5;
+  background-size: cover;
+  background-position: center 18%;
+  mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    rgba(0, 0, 0, 0.55) 10%,
+    #000 26%,
+    #000 74%,
+    rgba(0, 0, 0, 0.55) 90%,
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    rgba(0, 0, 0, 0.55) 10%,
+    #000 26%,
+    #000 74%,
+    rgba(0, 0, 0, 0.55) 90%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(to top, transparent 0%, #000 12%);
+  -webkit-mask-composite: source-in;
+  transition:
+    opacity 0.5s ease,
+    transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  filter: drop-shadow(0 8px 30px rgba(0, 0, 0, 0.55));
+  will-change: opacity, transform;
+}
+.figure-layer.fig-dim {
+  filter: brightness(0.55) drop-shadow(0 8px 30px rgba(0, 0, 0, 0.55));
+}
+
+/* ── 文本框 ───────────────────────────── */
+.dialog-box {
+  background: linear-gradient(180deg, rgba(16, 10, 14, 0.86) 0%, rgba(24, 15, 20, 0.93) 100%);
+  border: 1px solid rgba(217, 122, 146, 0.35);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.5),
+    0 -6px 40px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(10px);
+}
+.dialog-text {
+  line-height: 2;
+  letter-spacing: 0.04em;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+/* 打字机光标 */
+.type-cursor {
+  display: inline-block;
+  width: 0.55em;
+  height: 1.05em;
+  margin-left: 2px;
+  vertical-align: -0.12em;
+  background: linear-gradient(180deg, #f0a7bb, #d97a92);
+  animation: cursor-blink 0.85s steps(2) infinite;
+}
+@keyframes cursor-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* ── 章节标题卡 ───────────────────────── */
+.chapter-card {
+  background: radial-gradient(ellipse at center, rgba(20, 12, 17, 0.35) 0%, rgba(13, 9, 12, 0.92) 78%);
+}
+.chapter-line {
+  background: linear-gradient(90deg, transparent, #d9b08c 18%, #f0d2a8 50%, #d9b08c 82%, transparent);
+  height: 1px;
+}
+
+/* ── 特效大字 ─────────────────────────── */
+.fx-text {
+  font-family: var(--font-noto-serif), "Noto Serif SC", serif;
+  letter-spacing: 0.5em;
+  text-shadow:
+    0 0 22px rgba(217, 122, 146, 0.65),
+    0 2px 4px rgba(0, 0, 0, 0.9);
+  animation: fx-in 1.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+@keyframes fx-in {
+  0% {
+    opacity: 0;
+    transform: scale(1.35);
+    filter: blur(8px);
+  }
+  22% {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
+  }
+  82% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+}
+
+/* ── 标题画面 ─────────────────────────── */
+.title-bg {
+  animation: title-pan 40s ease-in-out infinite alternate;
+}
+@keyframes title-pan {
+  from {
+    transform: scale(1.05);
+  }
+  to {
+    transform: scale(1.16) translateX(-1.5%);
+  }
+}
+.title-vignette {
+  background:
+    linear-gradient(180deg, rgba(13, 9, 12, 0.25) 0%, rgba(13, 9, 12, 0.05) 35%, rgba(13, 9, 12, 0.82) 100%),
+    radial-gradient(ellipse at 50% 40%, transparent 55%, rgba(13, 9, 12, 0.5) 100%);
+}
+
+.menu-item {
+  position: relative;
+  transition:
+    color 0.3s ease,
+    letter-spacing 0.3s ease,
+    transform 0.3s ease;
+}
+.menu-item::before {
+  content: "❀";
+  position: absolute;
+  left: -1.4em;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  color: #f0a7bb;
+  font-size: 0.8em;
+  top: 0.28em;
+}
+.menu-item:hover,
+.menu-item:focus-visible {
+  color: #ffd9e2;
+  letter-spacing: 0.42em;
+  transform: translateX(6px);
+}
+.menu-item:hover::before,
+.menu-item:focus-visible::before {
+  opacity: 1;
+}
+
+/* ── 按钮与控件 ───────────────────────── */
+.glass-chip {
+  background: rgba(20, 13, 17, 0.62);
+  border: 1px solid rgba(245, 236, 228, 0.18);
+  backdrop-filter: blur(8px);
+}
+
+.choice-btn {
+  background: linear-gradient(180deg, rgba(36, 24, 30, 0.92) 0%, rgba(26, 17, 21, 0.96) 100%);
+  border: 1px solid rgba(217, 122, 146, 0.45);
+  transition:
+    transform 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease,
+    background 0.25s ease;
+}
+.choice-btn:hover,
+.choice-btn:focus-visible {
+  transform: translateX(6px);
+  border-color: #f0a7bb;
+  background: linear-gradient(180deg, rgba(60, 34, 44, 0.95) 0%, rgba(40, 24, 32, 0.97) 100%);
+  box-shadow: -4px 0 0 0 #d97a92, 0 8px 30px -8px rgba(217, 122, 146, 0.45);
+}
+
+/* ── 日文装饰 ─────────────────────────── */
+.ruby-text {
+  letter-spacing: 0.28em;
+}
+
+/* ── 滚动条 ───────────────────────────── */
+.nice-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+.nice-scroll::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.25);
+}
+.nice-scroll::-webkit-scrollbar-thumb {
+  background: rgba(217, 122, 146, 0.5);
+  border-radius: 6px;
+}
+
+/* ── CG 鉴赏格 ────────────────────────── */
+.cg-card {
+  transition:
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.35s ease;
+}
+.cg-card:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 18px 44px -14px rgba(217, 122, 146, 0.5);
+}
+.cg-locked {
+  background:
+    repeating-linear-gradient(45deg, #241a20 0 10px, #2b1f26 10px 20px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bg-kosho,
+  .title-bg {
+    animation: none;
+  }
+  .fx-text {
+    animation-duration: 2.4s;
+  }
+}
