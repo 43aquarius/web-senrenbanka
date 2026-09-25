@@ -1,0 +1,535 @@
+/**
+ * 构建 standalone.html —— 单文件复刻版
+ * 用法: bun scripts/build-standalone.ts
+ * 输出: .publish/standalone.html
+ */
+import { SCRIPT } from "../src/lib/game/script";
+import { CG_LIST, FIGURES } from "../src/lib/game/types";
+import { writeFileSync } from "fs";
+
+const scriptJson = JSON.stringify(SCRIPT);
+const cgJson = JSON.stringify(CG_LIST);
+const figuresJson = JSON.stringify(FIGURES);
+
+const html = `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>千恋＊万花 ｜ Web版 · 序章（单文件版）</title>
+<meta name="description" content="在浏览器中体验《千恋＊万花》的开端——粉丝自制的非官方免费 Web 视觉小说（全年龄向）。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23c9657f'/%3E%3Cpath d='M32 8 C34.5 22 38 25.5 52 28 C38 30.5 34.5 34 32 48 C29.5 34 26 30.5 12 28 C26 25.5 29.5 22 32 8 Z' fill='%23fff8f2'/%3E%3C/svg%3E">
+<style>
+:root{--pink:#d97a92;--pink-l:#f0a7bb;--gold:#e8c496;--bg:#1a1216;--card:#241a20}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overscroll-behavior:none}
+body{background:#0d090c;color:#f5ece4;font-family:'Noto Sans SC','Source Han Sans SC','PingFang SC','Microsoft YaHei',sans-serif;-webkit-font-smoothing:antialiased;user-select:none}
+.serif{font-family:'Noto Serif SC','Source Han Serif SC','STSong','SimSun',serif}
+.stage{position:relative;width:100%;height:100dvh;overflow:hidden}
+.bgl{position:absolute;inset:0;background-size:cover;background-position:center;transition:opacity .9s,filter .9s;animation:zoom 24s ease-in-out infinite alternate}
+@keyframes zoom{from{transform:scale(1)}to{transform:scale(1.06)}}
+.fx-dim{filter:brightness(.55) saturate(.85)}
+.fx-flash{animation:flash .65s ease-out}
+@keyframes flash{0%{filter:brightness(2.6)}100%{filter:brightness(1)}}
+.fig{position:absolute;bottom:0;height:min(78vh,118vw);aspect-ratio:4/5;background-size:cover;background-position:center 18%;
+-webkit-mask-image:linear-gradient(to top,transparent 0,#000 12%);mask-image:linear-gradient(to top,transparent 0,#000 12%);
+transition:opacity .5s,transform .6s cubic-bezier(.22,1,.36,1);filter:drop-shadow(0 8px 30px rgba(0,0,0,.55))}
+.dbox{position:absolute;left:0;right:0;bottom:0;padding:12px 12px 64px;padding-bottom:64px;z-index:20}
+.dbox-in{max-width:896px;margin:0 auto;background:linear-gradient(180deg,rgba(16,10,14,.86),rgba(24,15,20,.93));border:1px solid rgba(217,122,146,.35);border-radius:12px;padding:18px 22px;backdrop-filter:blur(10px);box-shadow:0 -6px 40px rgba(0,0,0,.4);cursor:pointer}
+.speaker{font-size:19px;font-weight:700;letter-spacing:.2em;margin-bottom:8px}
+.ruby{font-size:10px;letter-spacing:.28em;color:rgba(245,236,228,.4);margin-left:8px}
+.stext{font-size:16px;line-height:2;letter-spacing:.04em;min-height:4.5em;text-shadow:0 1px 2px rgba(0,0,0,.8)}
+.cursor{display:inline-block;width:.55em;height:1.05em;margin-left:2px;vertical-align:-.12em;background:linear-gradient(180deg,#f0a7bb,#d97a92);animation:blink .85s steps(2) infinite}
+@keyframes blink{50%{opacity:0}}
+.next-arrow{position:absolute;bottom:70px;right:26px;animation:bounce 1.2s infinite;color:var(--pink);font-size:20px;pointer-events:none}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
+.chapter{position:absolute;inset:0;z-index:20;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(ellipse at center,rgba(20,12,17,.35),rgba(13,9,12,.92) 78%);cursor:pointer}
+.chapter .sub{font-size:13px;letter-spacing:.28em;color:var(--gold);margin-bottom:18px}
+.chapter h2{font-size:44px;font-weight:900;letter-spacing:.3em;color:#fff;text-shadow:0 2px 20px rgba(0,0,0,.8)}
+.chapter .line{width:240px;height:1px;margin-top:32px;background:linear-gradient(90deg,transparent,#d9b08c 18%,#f0d2a8 50%,#d9b08c 82%,transparent)}
+.chapter .tap{margin-top:32px;font-size:12px;letter-spacing:.4em;color:rgba(255,255,255,.6);animation:pulse 2s infinite}
+@keyframes pulse{50%{opacity:.4}}
+.fxwrap{position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;pointer-events:none}
+.fxtext{font-size:56px;font-weight:900;letter-spacing:.5em;color:#ffd9e2;text-shadow:0 0 22px rgba(217,122,146,.65),0 2px 4px rgba(0,0,0,.9);animation:fxin 1.4s cubic-bezier(.22,1,.36,1) forwards}
+@keyframes fxin{0%{opacity:0;transform:scale(1.35);filter:blur(8px)}22%{opacity:1;transform:scale(1);filter:blur(0)}82%{opacity:1}100%{opacity:0;transform:scale(.97)}}
+.choicewrap{position:absolute;inset:0;z-index:20;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:rgba(0,0,0,.45);padding:24px}
+.choicewrap>p{font-size:19px;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.9)}
+.choices{display:flex;flex-direction:column;gap:14px;width:100%;max-width:560px}
+.choice-btn{background:linear-gradient(180deg,rgba(36,24,30,.92),rgba(26,17,21,.96));border:1px solid rgba(217,122,146,.45);border-radius:10px;padding:16px 22px;text-align:left;cursor:pointer;color:#fff;transition:all .25s}
+.choice-btn:hover{transform:translateX(6px);border-color:var(--pink-l);box-shadow:-4px 0 0 0 var(--pink),0 8px 30px -8px rgba(217,122,146,.45)}
+.choice-btn .lb{font-size:17px;font-weight:700;letter-spacing:.08em}
+.choice-btn .hint{display:block;margin-top:4px;font-size:12px;color:rgba(255,255,255,.45)}
+.ctrl{position:absolute;top:8px;right:8px;z-index:30;display:flex;gap:6px}
+.cbtn{width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.15);background:rgba(0,0,0,.4);color:rgba(255,255,255,.7);cursor:pointer;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px);transition:all .2s}
+.cbtn:hover{border-color:rgba(255,255,255,.5);color:#fff}
+.cbtn.on{border-color:var(--pink);background:rgba(217,122,146,.25);color:#fff}
+.progress{position:absolute;top:0;left:0;height:3px;width:100%;background:rgba(0,0,0,.4);z-index:30}
+.progress-in{height:100%;background:linear-gradient(90deg,#8e2d3a,#f0a7bb);transition:width .7s}
+.ending{position:absolute;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.85);padding:24px;text-align:center}
+.ending .in{max-width:420px}
+.ending h2{font-size:30px;letter-spacing:.2em;color:#fff;margin-bottom:24px}
+.ending p{font-size:14px;line-height:2;color:rgba(255,255,255,.75);margin-bottom:36px}
+.ending .btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.btn-p{background:linear-gradient(180deg,#d97a92,#8e2d3a);color:#fff;border:none;border-radius:50px;padding:12px 30px;font-size:14px;font-weight:700;letter-spacing:.2em;cursor:pointer;transition:transform .2s}
+.btn-p:hover{transform:scale(1.05)}
+.btn-o{background:transparent;color:rgba(255,255,255,.85);border:1px solid rgba(255,255,255,.3);border-radius:50px;padding:12px 30px;font-size:14px;font-weight:700;letter-spacing:.2em;cursor:pointer;text-decoration:none;transition:border-color .2s}
+.btn-o:hover{border-color:rgba(255,255,255,.7);color:#fff}
+/* 标题画面 */
+.title{position:absolute;inset:0;overflow:hidden}
+.title-bg{position:absolute;inset:0;background-size:cover;background-position:center;animation:pan 40s ease-in-out infinite alternate}
+@keyframes pan{from{transform:scale(1.05)}to{transform:scale(1.16) translateX(-1.5%)}}
+.title-vig{position:absolute;inset:0;background:linear-gradient(180deg,rgba(13,9,12,.25),rgba(13,9,12,.05) 35%,rgba(13,9,12,.82)),radial-gradient(ellipse at 50% 40%,transparent 55%,rgba(13,9,12,.5))}
+.badge{position:absolute;top:16px;left:16px;z-index:10;font-size:10px;font-weight:700;letter-spacing:.25em;color:rgba(255,255,255,.85);background:rgba(20,13,17,.62);border:1px solid rgba(255,255,255,.18);border-radius:99px;padding:5px 12px;backdrop-filter:blur(8px)}
+.title-top{position:absolute;top:16px;right:16px;z-index:10;display:flex;gap:8px;align-items:center}
+.icobtn{width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.2);background:rgba(0,0,0,.4);color:rgba(255,255,255,.85);cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px);transition:all .2s;text-decoration:none}
+.icobtn:hover{border-color:rgba(255,255,255,.6);color:#fff}
+.ghbtn{display:inline-flex;align-items:center;gap:8px;border-radius:99px;padding:8px 16px;font-size:12px;font-weight:700}
+.title-center{position:relative;z-index:10;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 24px 64px}
+.title-ruby{font-size:12px;letter-spacing:.28em;color:rgba(255,255,255,.7);margin-bottom:12px}
+.title-h1{font-size:clamp(46px,12vw,104px);font-weight:900;letter-spacing:.06em;color:#fff;text-shadow:0 2px 0 rgba(142,45,58,.9),0 4px 10px rgba(0,0,0,.7),0 0 60px rgba(217,122,146,.45);line-height:1.05}
+.title-h1 .star{color:var(--gold);font-size:.68em;vertical-align:middle;margin:0 4px}
+.title-sub{font-size:15px;letter-spacing:.5em;color:rgba(255,255,255,.85);margin-top:14px}
+.menu{display:flex;flex-direction:column;align-items:center;gap:18px;margin-top:44px}
+.mitem{background:none;border:none;cursor:pointer;color:rgba(255,255,255,.95);font-size:21px;font-weight:700;letter-spacing:.35em;transition:all .3s;position:relative;font-family:inherit}
+.mitem::before{content:'❀';position:absolute;left:-1.4em;top:.28em;font-size:.8em;color:var(--pink-l);opacity:0;transition:opacity .3s}
+.mitem:hover:not(:disabled){color:#ffd9e2;letter-spacing:.42em;transform:translateX(6px)}
+.mitem:hover:not(:disabled)::before{opacity:1}
+.mitem:disabled{color:rgba(255,255,255,.25);cursor:not-allowed}
+.mitem .cnt{font-size:12px;font-weight:400;letter-spacing:0;color:rgba(240,167,187,.8);margin-left:8px}
+.title-note{margin-top:40px;font-size:10px;line-height:1.8;color:rgba(255,255,255,.45);text-align:center}
+.title-foot{position:absolute;bottom:0;left:0;right:0;z-index:10;display:flex;flex-wrap:wrap;gap:4px 12px;justify-content:center;background:linear-gradient(to top,rgba(0,0,0,.7),transparent);padding:32px 16px 12px;font-size:10px;letter-spacing:.1em;color:rgba(255,255,255,.4)}
+.title-foot a{color:rgba(255,255,255,.55);text-decoration:none}
+.title-foot a:hover{color:#fff}
+/* 弹窗 */
+.modal{position:absolute;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.7);backdrop-filter:blur(6px);padding:16px}
+.modal-in{width:100%;max-width:480px;max-height:80vh;overflow:auto;background:rgba(30,20,26,.97);border:1px solid rgba(217,122,146,.3);border-radius:16px;padding:24px}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.modal-head h3{font-size:17px;letter-spacing:.25em;color:#fff;font-weight:700}
+.log-item{border-left:2px solid rgba(217,122,146,.4);padding-left:14px;margin-bottom:14px}
+.log-item .w{font-size:13px;font-weight:700;color:var(--pink-l);margin-bottom:2px}
+.log-item .t{font-size:13px;line-height:1.7;color:rgba(255,255,255,.85)}
+.save-row{display:flex;justify-content:space-between;align-items:center;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);border-radius:10px;padding:12px 16px;margin-bottom:10px}
+.save-row .info{min-width:0}
+.save-row .n{font-size:14px;font-weight:700;color:rgba(255,255,255,.85)}
+.save-row .d{font-size:11px;color:rgba(255,255,255,.45);margin-top:2px}
+.save-btns{display:flex;gap:8px}
+.sbtn{border-radius:99px;padding:6px 16px;font-size:12px;font-weight:700;cursor:pointer;border:1px solid transparent}
+.sbtn.p{background:rgba(217,122,146,.9);color:#fff;border:none}
+.sbtn.o{background:transparent;color:rgba(255,255,255,.85);border-color:rgba(255,255,255,.3)}
+.sbtn:disabled{opacity:.3;cursor:not-allowed}
+.menu-row{display:flex;justify-content:space-between;align-items:center;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);border-radius:10px;padding:12px 16px;margin-bottom:10px}
+.menu-row .l{font-size:14px;font-weight:700;color:rgba(255,255,255,.9)}
+.menu-row .h{font-size:11px;color:rgba(255,255,255,.4);margin-top:2px}
+.menu-row button{background:none;border:none;color:rgba(255,255,255,.9);cursor:pointer;font-size:14px;font-weight:700;text-align:left;font-family:inherit;width:100%}
+input[type=range]{accent-color:var(--pink);width:140px}
+.kbd{border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.1);border-radius:4px;padding:1px 7px;font-size:11px;font-family:monospace;margin-right:6px}
+/* 鉴赏 & 关于 */
+.page{position:absolute;inset:0;overflow-y:auto;background:#160f13;z-index:10}
+.page-head{position:sticky;top:0;z-index:5;display:flex;justify-content:space-between;align-items:center;padding:14px 20px;background:rgba(22,15,19,.92);border-bottom:1px solid rgba(255,255,255,.1);backdrop-filter:blur(8px)}
+.page-head h2{font-size:19px;letter-spacing:.25em;color:#fff}
+.page-head .en{font-size:9px;letter-spacing:.3em;color:rgba(255,255,255,.4)}
+.page-head .cnt{font-size:13px;font-weight:700;color:var(--pink-l)}
+.cg-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:20px 16px;max-width:1152px;margin:0 auto}
+@media(min-width:640px){.cg-grid{grid-template-columns:repeat(3,1fr);gap:14px}}
+@media(min-width:1024px){.cg-grid{grid-template-columns:repeat(4,1fr)}}
+.cg-card{aspect-ratio:4/3;border-radius:12px;overflow:hidden;position:relative;border:1px solid rgba(217,122,146,.3);cursor:pointer;transition:transform .3s,box-shadow .3s}
+.cg-card:hover{transform:translateY(-4px) scale(1.02);box-shadow:0 18px 44px -14px rgba(217,122,146,.5)}
+.cg-card.open{background-size:cover;background-position:center}
+.cg-card.open .cap{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(to top,rgba(0,0,0,.85),transparent);padding:26px 12px 10px;font-size:13px;font-weight:700;color:#fff}
+.cg-card.lock{background:repeating-linear-gradient(45deg,#241a20 0 10px,#2b1f26 10px 20px);cursor:not-allowed;border-color:rgba(255,255,255,.05);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
+.cg-card.lock .q{font-size:30px;color:rgba(255,255,255,.15);font-weight:700}
+.cg-card.lock .lk{font-size:10px;letter-spacing:.3em;color:rgba(255,255,255,.25)}
+.preview{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.92);padding:16px}
+.preview img{max-width:100%;max-height:85vh;border-radius:12px;border:1px solid rgba(217,122,146,.3)}
+.about{max-width:720px;margin:0 auto;padding:32px 20px 48px}
+.about h2{font-size:19px;letter-spacing:.25em;color:#fff;margin-bottom:8px}
+.about .en{font-size:9px;letter-spacing:.3em;color:rgba(255,255,255,.4);margin-bottom:28px}
+.about section{border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);border-radius:16px;padding:22px;margin-bottom:18px}
+.about h3{font-size:16px;letter-spacing:.15em;color:var(--pink-l);margin-bottom:12px;font-weight:700}
+.about p{font-size:13.5px;line-height:2;color:rgba(255,255,255,.75);margin-bottom:10px}
+.about a{color:var(--pink-l)}
+.about .links{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.about .guide{display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px;color:rgba(255,255,255,.7)}
+.about .foot{text-align:center;font-size:11px;color:rgba(255,255,255,.35);margin-top:28px;line-height:1.8}
+.backbtn{width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.15);background:none;color:rgba(255,255,255,.75);cursor:pointer;display:flex;align-items:center;justify-content:center}
+@media(max-width:480px){.stext{font-size:14px}.chapter h2{font-size:32px}.fxtext{font-size:38px}.title-h1{font-size:clamp(44px,15vw,64px)}}
+</style>
+</head>
+<body>
+<div class="stage" id="stage"></div>
+<script>
+/* ═══════════════ 数据 ═══════════════ */
+const SCRIPT = ${scriptJson};
+const CG_LIST = ${cgJson};
+const FIGURES = ${figuresJson};
+const GITHUB_URL = 'https://github.com/43aquarius/web-senrenbanka';
+const RAW_BASE = 'https://raw.githubusercontent.com/43aquarius/web-senrenbanka/main/public/';
+const LABELS = {};
+SCRIPT.forEach((c,i)=>{ if(c.t==='label') LABELS[c.id]=i; });
+
+/* 素材路径：相对路径优先，raw 兜底 */
+function asset(p){
+  if (/^https?:/.test(p)) return p;
+  return p.startsWith('/') ? p.slice(1) : p;
+}
+const bgEl = new Image();
+const rawCache = {};
+function imgWithFallback(p){
+  const rel = asset(p);
+  if (rawCache[rel] === 'raw') return RAW_BASE + rel;
+  return rel;
+}
+/* 预探测：相对路径不可用时切换 raw（缺素材目录时，如单独分发此文件） */
+(function probe(){
+  const t = new Image();
+  t.onload = ()=>{ rawCache.mode='rel'; };
+  t.onerror = ()=>{ rawCache.mode='raw'; };
+  t.src = 'public/assets/bg/title.jpg';
+})();
+function A(p){ // asset resolver：仓库结构下素材位于 public/assets
+  const rel = asset(p);
+  return rawCache.mode === 'raw' ? RAW_BASE + rel : 'public/' + rel;
+}
+
+/* ═══════════════ 存档 ═══════════════ */
+const K = { auto:'sb_web_auto', slot:n=>'sb_web_slot_'+n, unlocked:'sb_web_unlocked', cfg:'sb_web_cfg' };
+const store = {
+  get(k, d){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+};
+let config = Object.assign({volume:.6, speed:28, autoWait:1600}, store.get(K.cfg, {}));
+let unlocked = store.get(K.unlocked, []);
+function unlock(src){ if(!unlocked.includes(src)){ unlocked.push(src); store.set(K.unlocked, unlocked); } }
+
+/* ═══════════════ 音频 ═══════════════ */
+const audio = new Audio();
+audio.loop = true;
+function playBgm(src){
+  if(!src){ audio.pause(); return; }
+  const url = A(src);
+  if(!audio.src.endsWith(url)){ audio.src = url; audio.volume = config.volume; audio.play().catch(()=>{}); }
+}
+
+/* ═══════════════ 状态机 ═══════════════ */
+let screen = 'title';
+let st = { index:-1, bg:null, bgFx:null, bgm:null, figure:null, chapter:null, say:null, choice:null, fx:null, ending:null };
+let typed = 0, done = false, auto = false, skip = false;
+let history = [];
+let typeTimer = null, autoTimer = null, skipTimer = null;
+let modalState = null; // 'log' | 'save' | 'menu'
+
+function createInit(){ return { index:-1, bg:null, bgFx:null, bgm:null, figure:null, chapter:null, say:null, choice:null, fx:null, ending:null }; }
+
+function advance(start){
+  const next = Object.assign({}, createInit(), { bg:st.bg, bgFx:st.bgFx, bgm:st.bgm, figure:st.figure });
+  let i = start, guard = 0;
+  while(i < SCRIPT.length && guard < 10000){
+    guard++;
+    const c = SCRIPT[i];
+    if(c.t==='bg'){ next.bg=c.src; next.bgFx=c.fx||null; i++; continue; }
+    if(c.t==='bgm'){ next.bgm=c.src; i++; continue; }
+    if(c.t==='show'){ next.figure=c.figure; i++; continue; }
+    if(c.t==='hide'){ next.figure=null; i++; continue; }
+    if(c.t==='jump'){ i = LABELS[c.id] ?? i+1; continue; }
+    if(c.t==='label'){ i++; continue; }
+    if(c.t==='chapter'){ next.chapter={title:c.title, sub:c.sub}; next.index=i; break; }
+    if(c.t==='say'){
+      next.say={who:c.who, whoRuby:c.whoRuby, text:c.text, color:c.color};
+      if(c.figure) next.figure=c.figure;
+      next.index=i; break;
+    }
+    if(c.t==='choice'){ next.choice={prompt:c.prompt, options:c.options}; next.index=i; break; }
+    if(c.t==='fx'){ next.fx=c.text; next.index=i; break; }
+    if(c.t==='ending'){
+      next.ending={id:c.id, title:c.title, desc:c.desc, cg:c.cg};
+      next.index=i;
+      // 通关全开
+      CG_LIST.forEach(cg=>unlock(cg.src));
+      break;
+    }
+    i++;
+  }
+  if(!next.index && next.index!==0) next.index = SCRIPT.length;
+  return next;
+}
+
+function unlockUpTo(idx){
+  for(let i=0;i<=idx && i<SCRIPT.length;i++){
+    const c = SCRIPT[i];
+    if(c.t==='bg' && c.src.includes('/cg/')) unlock(c.src);
+    if(c.t==='ending' && c.cg) unlock(c.cg);
+  }
+}
+
+function gotoScene(next){
+  st = next;
+  typed = 0; done = false;
+  if(st.say){ history.push({who:st.say.who, text:st.say.text}); if(history.length>200) history.shift(); }
+  if(st.ending) history.push({who:'', text:'【'+st.ending.title+'】'+st.ending.desc});
+  playBgm(st.bgm);
+  render();
+  // 自动存档
+  store.set(K.auto, {index:st.index, ts:Date.now()});
+  // 通关提示解锁数
+  if(st.ending) unlocked = store.get(K.unlocked, []);
+}
+
+function next(){ if(st.ending || st.choice) return; const n = advance(st.index+1); unlockUpTo(n.index); gotoScene(n); }
+function choose(gotoId){ const n = advance((LABELS[gotoId] ?? st.index)+1); unlockUpTo(n.index); gotoScene(n); }
+
+function advanceOnce(){
+  if(auto||skip){ auto=false; skip=false; render(); }
+  if(st.say && !done){ typed = st.say.text.length; done = true; render(); return; }
+  if(st.ending || st.choice) return;
+  next();
+}
+
+/* ═══════════════ 打字机循环 ═══════════════ */
+function tick(){
+  if(screen!=='playing'){ return; }
+  if(st.say && !done && typed < st.say.text.length){
+    typed++;
+    const el = document.getElementById('stext');
+    if(el){ el.innerHTML = esc(st.say.text.slice(0,typed)) + '<span class="cursor"></span>'; }
+    typeTimer = setTimeout(tick, Math.max(6, config.speed));
+  } else if(st.say && !done && typed >= st.say.text.length){
+    done = true; render();
+    scheduleAuto();
+  } else if(st.say && done){
+    scheduleAuto();
+  }
+}
+function scheduleAuto(){
+  clearTimeout(autoTimer);
+  if(auto && st.say && done){
+    autoTimer = setTimeout(()=>{ if(auto) next(); }, config.autoWait + Math.min(st.say.text.length*18, 2400));
+  }
+}
+
+function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+/* ═══════════════ 渲染 ═══════════════ */
+const stage = document.getElementById('stage');
+function render(){
+  if(screen==='title') renderTitle();
+  else if(screen==='playing') renderGame();
+  else if(screen==='gallery') renderGallery();
+  else if(screen==='about') renderAbout();
+}
+const GH_SVG = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.56 0-.27-.01-1.17-.02-2.12-3.2.7-3.88-1.36-3.88-1.36-.52-1.33-1.28-1.68-1.28-1.68-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.19 1.76 1.19 1.03 1.76 2.69 1.25 3.35.96.1-.75.4-1.25.72-1.54-2.55-.29-5.24-1.28-5.24-5.68 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11.1 11.1 0 0 1 5.8 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.41-2.69 5.38-5.25 5.67.41.35.77 1.05.77 2.12 0 1.53-.01 2.76-.01 3.14 0 .31.21.68.8.56A10.52 10.52 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5z"/></svg>';
+
+function renderTitle(){
+  screen='title';
+  stage.innerHTML = \`
+  <div class="title">
+    <div class="title-bg" style="background-image:url('\${A('/assets/bg/title.jpg')}')"></div>
+    <div class="title-vig"></div>
+    <span class="badge">FAN-MADE WEB EDITION · 全年龄向</span>
+    <div class="title-top">
+      <button class="icobtn" id="btn-mute" title="音乐开关">\${config.volume===0?'🔇':'🔊'}</button>
+      <a class="icobtn ghbtn" href="\${GITHUB_URL}" target="_blank" rel="noopener noreferrer" title="GitHub 仓库">\${GH_SVG}<span style="font-size:12px">GITHUB</span></a>
+    </div>
+    <div class="title-center">
+      <p class="title-ruby">── せんれん＊ばんか ──</p>
+      <h1 class="title-h1 serif">千恋<span class="star">＊</span>万花</h1>
+      <p class="title-sub serif">Web版 · 序章</p>
+      <nav class="menu">
+        <button class="mitem serif" id="m-new">开始游戏</button>
+        <button class="mitem serif" id="m-cont" \${store.get(K.auto,null)||store.get(K.slot(1),null)?'':'disabled'}>继续游戏</button>
+        <button class="mitem serif" id="m-gal">CG 鉴赏<span class="cnt">\${unlocked.length}/\${CG_LIST.length}</span></button>
+        <button class="mitem serif" id="m-about">关于本站</button>
+      </nav>
+      <p class="title-note">本作品为粉丝自制的非官方免费体验版 · 与 Yuzu-soft 无关<br>商业版本请支持官方发售的原作游戏</p>
+    </div>
+    <div class="title-foot">
+      <span>© Yuzu-soft 千恋＊万花</span><span>·</span><span>Fan-made Tribute</span><span>·</span>
+      <a href="\${GITHUB_URL}" target="_blank" rel="noopener noreferrer">GitHub · web-senrenbanka</a>
+    </div>
+  </div>\`;
+  document.getElementById('m-new').onclick = ()=>{ st = createInit(); const n = advance(0); unlockUpTo(n.index); screen='playing'; gotoScene(n); };
+  document.getElementById('m-cont').onclick = function(){ if(this.disabled) return;
+    const s = store.get(K.auto,null) || store.get(K.slot(1),null); if(!s) return;
+    const n = advance(s.index); unlockUpTo(n.index); screen='playing'; gotoScene(n); };
+  document.getElementById('m-gal').onclick = ()=>renderGallery();
+  document.getElementById('m-about').onclick = ()=>renderAbout();
+  document.getElementById('btn-mute').onclick = (e)=>{
+    e.stopPropagation();
+    const muted = config.volume===0;
+    config.volume = muted ? .6 : 0; store.set(K.cfg, config);
+    audio.volume = config.volume;
+    if(muted && st.bgm) playBgm(st.bgm); else if(!muted) audio.pause();
+    renderTitle();
+  };
+  playBgm('/assets/music/title.mp3');
+}
+
+function renderGame(){
+  const fig = st.figure ? FIGURES[st.figure.id] : null;
+  const figSrc = fig ? (fig.portraits[st.figure.variant||'default']||fig.portraits.default) : null;
+  const figPos = st.figure ? (st.figure.side==='left'?'left:2%;':st.figure.side==='right'?'right:2%;':'left:50%;transform:translateX(-50%);') : '';
+  let html = '';
+  if(st.bg) html += '<div class="bgl '+(st.bgFx||'')+'" style="background-image:url(\\''+A(st.bg)+'\\')"></div>';
+  if(figSrc) html += '<div class="fig" style="background-image:url(\\''+A(figSrc)+'\\');'+figPos+'"></div>';
+  if(st.chapter){
+    html += '<div class="chapter" id="chapter"><p class="sub serif">'+esc(st.chapter.sub||'')+'</p><h2 class="serif">'+esc(st.chapter.title)+'</h2><div class="line"></div><p class="tap">点击继续</p></div>';
+  }
+  if(st.fx) html += '<div class="fxwrap"><p class="fxtext serif">'+esc(st.fx)+'</p></div>';
+  if(st.ending){
+    html += '<div class="ending"><div class="in">'
+      + (st.ending.cg?'<div style="position:absolute;inset:0;background:url(\\''+A(st.ending.cg)+'\\') center/cover;opacity:.3;filter:blur(2px)"></div>':'')
+      + '<div style="position:relative"><h2 class="serif">'+esc(st.ending.title)+'</h2><div class="line" style="width:220px;height:1px;margin:0 auto 22px;background:linear-gradient(90deg,transparent,#d9b08c,transparent)"></div>'
+      + '<p>'+esc(st.ending.desc)+'</p><div class="btns"><button class="btn-p" id="btn-end-back">返回标题</button><a class="btn-o" href="'+GITHUB_URL+'" target="_blank" rel="noopener noreferrer">GitHub 项目</a></div></div></div></div>';
+  }
+  if(st.choice){
+    html += '<div class="choicewrap"><p class="serif">'+esc(st.choice.prompt)+'</p><div class="choices">';
+    st.choice.options.forEach((o,i)=>{
+      html += '<button class="choice-btn" data-goto="'+o.goto+'"><span class="lb serif">'+esc(o.label)+'</span>'+(o.hint?'<span class="hint">'+esc(o.hint)+'</span>':'')+'</button>';
+    });
+    html += '</div></div>';
+  }
+  if(st.say){
+    html += '<div class="dbox"><div class="dbox-in" id="dbox">'
+      + (st.say.who?'<div class="speaker serif" style="color:'+(st.say.color||'#f0a7bb')+'">'+esc(st.say.who)+(st.say.whoRuby?'<span class="ruby">'+esc(st.say.whoRuby)+'</span>':'')+'</div>':'')
+      + '<p class="stext serif" id="stext">' + (done ? esc(st.say.text) : esc(st.say.text.slice(0, typed)) + (typed > 0 || config.speed ? '' : '')) + '</p></div>'
+      + (done?'<div class="next-arrow">▾</div>':'')
+      + '</div>';
+  }
+  /* 控制栏 */
+  html += '<div class="ctrl">'
+    + '<button class="cbtn '+(auto?'on':'')+'" id="c-auto" title="自动播放(A)">▶</button>'
+    + '<button class="cbtn '+(skip?'on':'')+'" id="c-skip" title="快进(S)">⏩</button>'
+    + '<button class="cbtn" id="c-log" title="对话记录(L)">📜</button>'
+    + '<button class="cbtn '+(config.volume>0?'on':'')+'" id="c-vol" title="音乐(M)">'+(config.volume===0?'🔇':'🎵')+'</button>'
+    + '<button class="cbtn" id="c-save" title="存档">💾</button>'
+    + '<button class="cbtn" id="c-menu" title="菜单(Esc)">☰</button>'
+    + '</div>';
+  html += '<div class="progress"><div class="progress-in" style="width:'+Math.round(((st.index+1)/SCRIPT.length)*100)+'%"></div></div>';
+  if(modalState) html += renderModal();
+  stage.innerHTML = html;
+
+  /* 绑定 */
+  stage.onclick = (e)=>{
+    if(e.target.closest('.ctrl')||e.target.closest('.modal')||e.target.closest('.choicewrap')||e.target.closest('.ending')) return;
+    if(st.ending) return;
+    advanceOnce();
+  };
+  if(st.chapter){ document.getElementById('chapter').onclick = (e)=>{ e.stopPropagation(); next(); }; }
+  document.querySelectorAll('.choice-btn').forEach(b=>{ b.onclick=(e)=>{ e.stopPropagation(); choose(b.dataset.goto); }; });
+  const dbox = document.getElementById('dbox');
+  if(dbox) dbox.onclick = (e)=>{ e.stopPropagation(); if(!e.target.closest('a,button')) advanceOnce(); };
+  document.getElementById('c-auto').onclick=(e)=>{e.stopPropagation();auto=!auto;renderGame();if(auto)scheduleAuto();};
+  document.getElementById('c-skip').onclick=(e)=>{e.stopPropagation();skip=!skip;renderGame();kickSkip();};
+  document.getElementById('c-log').onclick=(e)=>{e.stopPropagation();modalState='log';renderGame();};
+  document.getElementById('c-vol').onclick=(e)=>{e.stopPropagation();const m=config.volume===0;config.volume=m?.6:0;store.set(K.cfg,config);audio.volume=config.volume;if(m&&st.bgm)playBgm(st.bgm);else if(!m)audio.pause();renderGame();};
+  document.getElementById('c-save').onclick=(e)=>{e.stopPropagation();modalState='save';renderGame();};
+  document.getElementById('c-menu').onclick=(e)=>{e.stopPropagation();modalState='menu';renderGame();};
+  if(st.ending){ document.getElementById('btn-end-back').onclick=(e)=>{e.stopPropagation();audio.pause();renderTitle();}; }
+  if(modalState) bindModal();
+  /* 打字机启动 */
+  if(st.say && !done){ clearTimeout(typeTimer); typeTimer = setTimeout(tick, config.speed); }
+  else if(st.say && done){ /* already complete */ }
+  if(skip && !st.choice && !st.ending) kickSkip();
+  scheduleAuto();
+}
+function kickSkip(){
+  clearTimeout(skipTimer);
+  if(skip && screen==='playing' && !st.choice && !st.ending){
+    skipTimer = setTimeout(()=>{ if(skip) next(); }, 130);
+  }
+}
+
+function renderModal(){
+  let inner = '';
+  if(modalState==='log'){
+    inner = '<div class="modal-head"><h3 class="serif">对话记录</h3><button class="icobtn" id="mo-close">✕</button></div>'
+      + '<div id="log-list" style="max-height:55vh;overflow:auto">' + (history.length? history.map(h=>'<div class="log-item">'+(h.who?'<div class="w serif">'+esc(h.who)+'</div>':'')+'<div class="t">'+esc(h.text)+'</div></div>').join('') : '<p style="font-size:13px;color:rgba(255,255,255,.4)">暂无记录。</p>') + '</div>';
+  } else if(modalState==='save'){
+    inner = '<div class="modal-head"><h3 class="serif">存档 / 读档</h3><button class="icobtn" id="mo-close">✕</button></div>';
+    for(let n=1;n<=3;n++){
+      const s = store.get(K.slot(n), null);
+      inner += '<div class="save-row"><div class="info"><div class="n">存档 '+n+'</div><div class="d">'+(s? new Date(s.ts).toLocaleString('zh-CN')+' · 进度 '+s.index : '—— 空 ——')+'</div></div>'
+        + '<div class="save-btns"><button class="sbtn p" data-save="'+n+'">保存</button><button class="sbtn o" data-load="'+n+'" '+(s?'':'disabled')+'>读取</button></div></div>';
+    }
+  } else if(modalState==='menu'){
+    inner = '<div class="modal-head"><h3 class="serif">菜单</h3><button class="icobtn" id="mo-close">✕</button></div>'
+      + '<div class="menu-row"><button id="mo-title"><span class="l">返回标题</span><div class="h">当前进度已自动保存</div></button></div>'
+      + '<div class="menu-row"><div><div class="l">语速调节</div><div class="h">当前 '+config.speed+'ms / 字</div></div><input type="range" min="8" max="70" value="'+config.speed+'" id="mo-speed"></div>'
+      + '<div class="menu-row"><div><div class="l">音乐音量</div><div class="h">'+(config.volume===0?'静音中':Math.round(config.volume*100)+'%')+'</div></div><input type="range" min="0" max="100" value="'+Math.round(config.volume*100)+'" id="mo-vol"></div>'
+      + '<div class="menu-row" style="display:block"><p style="font-size:11px;line-height:1.9;color:rgba(255,255,255,.5)">快捷键：<span class="kbd">空格</span>推进 <span class="kbd">A</span>自动 <span class="kbd">S</span>快进 <span class="kbd">L</span>记录 <span class="kbd">M</span>静音 <span class="kbd">Esc</span>菜单<br>素材版权归 © Yuzu-soft 所有，本站仅为粉丝自制体验版。</p></div>';
+  }
+  return '<div class="modal" id="modal"><div class="modal-in">'+inner+'</div></div>';
+}
+function bindModal(){
+  const mo = document.getElementById('modal');
+  mo.onclick = (e)=>{ if(e.target===mo){ modalState=null; renderGame(); } };
+  const close = document.getElementById('mo-close');
+  if(close) close.onclick = ()=>{ modalState=null; renderGame(); };
+  if(modalState==='save'){
+    document.querySelectorAll('[data-save]').forEach(b=>{ b.onclick=(e)=>{e.stopPropagation();store.set(K.slot(b.dataset.save),{index:st.index,ts:Date.now()});modalState=null;renderGame();}; });
+    document.querySelectorAll('[data-load]').forEach(b=>{ b.onclick=(e)=>{e.stopPropagation();if(b.disabled)return;const s=store.get(K.slot(b.dataset.load),null);if(s){const n=advance(s.index);unlockUpTo(n.index);gotoScene(n);modalState=null;renderGame();}}; });
+  }
+  if(modalState==='menu'){
+    document.getElementById('mo-title').onclick=()=>{ modalState=null; audio.pause(); renderTitle(); };
+    document.getElementById('mo-speed').oninput=(e)=>{ config.speed=+e.target.value; store.set(K.cfg,config); };
+    document.getElementById('mo-vol').oninput=(e)=>{ config.volume=e.target.value/100; store.set(K.cfg,config); audio.volume=config.volume; };
+  }
+}
+
+function renderGallery(){
+  screen='gallery';
+  let cards = CG_LIST.map(c=>{
+    const open = unlocked.includes(c.src);
+    if(open) return '<div class="cg-card open" style="background-image:url(\\''+A(c.src)+'\\')" data-src="'+c.src+'"><div class="cap serif">'+esc(c.title)+'</div></div>';
+    return '<div class="cg-card lock"><span class="q serif">?</span><span class="lk">LOCKED</span></div>';
+  }).join('');
+  stage.innerHTML = '<div class="page"><div class="page-head"><div style="display:flex;gap:12px;align-items:center"><button class="backbtn" id="g-back">←</button><div><h2 class="serif">CG 鉴赏</h2><p class="en">GALLERY</p></div></div><span class="cnt">'+unlocked.length+' / '+CG_LIST.length+'</span></div>'
+    + '<div class="cg-grid">'+cards+'</div>'
+    + '<p style="text-align:center;font-size:11px;color:rgba(255,255,255,.35);padding:0 16px 32px">随游戏进度逐步解锁 · 图片素材版权归 © Yuzu-soft 所有</p></div>';
+  document.getElementById('g-back').onclick = ()=>renderTitle();
+  document.querySelectorAll('.cg-card.open').forEach(c=>{ c.onclick=()=>{
+    const src = c.dataset.src;
+    const pv = document.createElement('div'); pv.className='preview';
+    pv.innerHTML = '<img src="'+A(src)+'" alt="CG 预览">';
+    pv.onclick=()=>pv.remove();
+    document.body.appendChild(pv);
+  };});
+}
+
+function renderAbout(){
+  screen='about';
+  stage.innerHTML = '<div class="page"><div class="page-head"><div style="display:flex;gap:12px;align-items:center"><button class="backbtn" id="a-back">←</button><div><h2 class="serif">关于本站</h2><p class="en">ABOUT</p></div></div></div>'
+  + '<div class="about">'
+  + '<section><h3 class="serif">千恋＊万花 ｜ Web版 · 序章</h3><p>这是一个由粉丝制作的<strong>非官方、非营利</strong>的网页版视觉小说体验，旨在用浏览器重现《千恋＊万花》序章的氛围。剧情文本为基于原作公开设定的原创改写，包含一条主线与三条分歧小径，通关约需 8～12 分钟。</p><p>本单文件版本无需安装任何依赖——双击 HTML 即可游玩；若图片无法加载（素材目录缺失），将自动切换到 GitHub 线上素材。</p></section>'
+  + '<section><h3 class="serif">版权与致谢</h3><p>《千恋＊万花》（せんれん＊ばんか）是 <strong>Yuzu-soft</strong> 制作的美少女游戏，其名称、角色、美术、音乐等一切权利归原权利方所有。本站与 Yuzu-soft 无任何关联。</p><p>本站使用的图片与音乐素材搜集自公开网络，仅用于粉丝非营利性质的展示与致敬；若权利方提出要求，将立即删除。本体验版<strong>不包含任何成人（R18）内容</strong>。</p><p>喜欢本作的话，请务必支持官方版本。</p>'
+  + '<div class="links"><a class="btn-p" style="text-decoration:none;display:inline-block" href="https://www.yuzu-soft.com/senren/" target="_blank" rel="noopener noreferrer">作品官方站点</a><a class="btn-o" href="https://www.yuzu-soft.com/" target="_blank" rel="noopener noreferrer">Yuzu-soft 官网</a></div></section>'
+  + '<section><h3 class="serif">项目仓库</h3><p>本项目完全开源（MIT License，不含第三方素材的权利授权）。使用 Next.js 构建，本文件为其单文件 HTML 复刻版。</p><div class="links"><a class="btn-o" style="display:inline-flex;gap:8px;align-items:center" href="'+GITHUB_URL+'" target="_blank" rel="noopener noreferrer">'+GH_SVG+' 43aquarius/web-senrenbanka</a></div></section>'
+  + '<section><h3 class="serif"> 操作指南</h3><div class="guide"><span><span class="kbd">空格/回车/点击</span>推进剧情</span><span><span class="kbd">A</span>自动播放</span><span><span class="kbd">S</span>快进模式</span><span><span class="kbd">L</span>对话记录</span><span><span class="kbd">M</span>音乐开关</span><span><span class="kbd">Esc</span>系统菜单</span></div></section>'
+  + '<p class="foot">Fan-made tribute ♥ ｜ © Yuzu-soft / 千恋＊万花</p>'
+  + '</div></div>';
+  document.getElementById('a-back').onclick = ()=>renderTitle();
+}
+
+/* ═══════════════ 键盘 ═══════════════ */
+window.addEventListener('keydown', (e)=>{
+  if(screen!=='playing') return;
+  if(modalState){ if(e.key==='Escape'){ modalState=null; renderGame(); } return; }
+  if(e.key===' '||e.key==='Enter'){ e.preventDefault(); advanceOnce(); }
+  else if(e.key==='Escape'){ modalState='menu'; renderGame(); }
+  else if(e.key==='a'||e.key==='A'){ auto=!auto; renderGame(); if(auto)scheduleAuto(); }
+  else if(e.key==='s'||e.key==='S'){ skip=!skip; renderGame(); kickSkip(); }
+  else if(e.key==='l'||e.key==='L'){ modalState='log'; renderGame(); }
+  else if(e.key==='m'||e.key==='M'){ const mu=config.volume===0; config.volume=mu?.6:0; store.set(K.cfg,config); audio.volume=config.volume; if(mu&&st.bgm)playBgm(st.bgm); else if(!mu)audio.pause(); renderGame(); }
+});
+
+/* 自动模式在 say 完成后调度 */
+const _origNext = next;
+next = function(){ _origNext(); scheduleAuto(); };
+
+/* ═══════════════ 启动 ═══════════════ */
+renderTitle();
+</script>
+</body>
+</html>`;
+
+writeFileSync(".publish/standalone.html", html);
+console.log("standalone.html written:", (html.length / 1024).toFixed(1), "KB");
